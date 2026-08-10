@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111827" />
+    <title>Aaron & Shark · AI 展示面</title>
+    <link rel="icon" href="./aaron-shark-icon.png" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div class="brand">
+          <img src="./aaron-shark-icon.png" alt="" />
+          <div>
+            <div class="brand-name">Aaron & Shark</div>
+            <div class="brand-subtitle">AI 展示面 · 浏览器版</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <span class="status-dot"></span>
+          <span class="status-text">本地工作区</span>
+          <button class="icon-button" id="resetButton" title="清空当前项目" aria-label="清空当前项目">↺</button>
+        </div>
+      </header>
+
+      <main class="workspace">
+        <section class="intro-row">
+          <div>
+            <p class="eyebrow">IMAGE 2.0 WORKFLOW</p>
+            <h1>把一个想法，整理成可执行的画面提示词。</h1>
+            <p class="intro-copy">上传主图、圈出需要编辑的区域，再用参考图补充脸型、服装和配饰。所有内容只保存在当前浏览器。</p>
+          </div>
+          <div class="step-strip" aria-label="工作流步骤">
+            <div class="step active"><span>01</span><b>主图</b></div>
+            <div class="step-line"></div>
+            <div class="step"><span>02</span><b>参考</b></div>
+            <div class="step-line"></div>
+            <div class="step"><span>03</span><b>导出</b></div>
+          </div>
+        </section>
+
+        <div class="content-grid">
+          <div class="left-column">
+            <section class="panel hero-panel">
+              <div class="panel-heading">
+                <div>
+                  <div class="section-kicker">01 / 主图与标注</div>
+                  <h2>圈出要改变的区域</h2>
+                </div>
+                <span class="panel-hint">拖拽绘制红圈</span>
+              </div>
+
+              <div class="upload-zone" id="mainUploadZone">
+                <input id="mainImageInput" type="file" accept="image/*" hidden />
+                <div class="upload-icon">＋</div>
+                <div>
+                  <strong>上传主图</strong>
+                  <span>PNG、JPG 或 WEBP，建议使用清晰原图</span>
+                </div>
+                <button class="secondary-button" id="chooseMainButton">选择文件</button>
+              </div>
+
+              <div class="canvas-stage empty" id="canvasStage">
+                <canvas id="annotationCanvas"></canvas>
+                <div class="empty-canvas-message" id="emptyCanvasMessage">
+                  <div class="empty-glyph">◌</div>
+                  <span>主图预览会显示在这里</span>
+                </div>
+              </div>
+
+              <div class="canvas-toolbar">
+                <div class="annotation-copy"><span class="red-key"></span>红圈区域将作为重点编辑对象</div>
+                <button class="text-button" id="clearAnnotationButton" disabled>清除标注</button>
+              </div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading compact">
+                <div>
+                  <div class="section-kicker">02 / 参考图</div>
+                  <h2>给画面更多方向</h2>
+                </div>
+                <span class="panel-hint">可选</span>
+              </div>
+              <div class="reference-groups">
+                <div class="reference-group">
+                  <div class="group-label"><span>脸部参考</span><small>可多选，点击星标设为主参考</small></div>
+                  <div class="reference-grid" id="faceReferences"></div>
+                  <button class="add-reference" data-target="face">＋ 添加脸部参考</button>
+                  <input type="file" accept="image/*" multiple hidden data-input="face" />
+                </div>
+                <div class="reference-group">
+                  <div class="group-label"><span>服装与配饰</span><small>用于描述材质、颜色和风格</small></div>
+                  <div class="reference-grid" id="styleReferences"></div>
+                  <button class="add-reference" data-target="style">＋ 添加服装 / 配饰参考</button>
+                  <input type="file" accept="image/*" multiple hidden data-input="style" />
+                </div>
+              </div>
+            </section>
+          </div>
+
+          <aside class="right-column">
+            <section class="panel prompt-panel">
+              <div class="panel-heading">
+                <div>
+                  <div class="section-kicker">03 / 画面意图</div>
+                  <h2>告诉 AI 你想要什么</h2>
+                </div>
+              </div>
+
+              <label class="field">
+                <span>画面描述</span>
+                <textarea id="descriptionInput" rows="4" placeholder="例如：保留原图构图，把人物换成更自然的亚洲女性面孔，光线保持柔和。"></textarea>
+              </label>
+              <div class="field-row">
+                <label class="field">
+                  <span>画面风格</span>
+                  <select id="styleInput">
+                    <option>写实摄影</option>
+                    <option>电影感人像</option>
+                    <option>时尚杂志</option>
+                    <option>胶片纪实</option>
+                    <option>插画质感</option>
+                  </select>
+                </label>
+                <label class="field">
+                  <span>画幅比例</span>
+                  <select id="ratioInput">
+                    <option>保持原图</option>
+                    <option>1:1</option>
+                    <option>4:5</option>
+                    <option>3:4</option>
+                    <option>16:9</option>
+                  </select>
+                </label>
+              </div>
+              <label class="toggle-row">
+                <input id="preserveInput" type="checkbox" checked />
+                <span class="toggle"></span>
+                <span><b>锁定未标注区域</b><small>尽量保持构图、姿态和背景不变</small></span>
+              </label>
+
+              <div class="prompt-actions">
+                <button class="primary-button" id="generateButton">✦ 生成提示词</button>
+                <button class="secondary-button" id="exportButton" disabled>⇩ 导出项目</button>
+              </div>
+            </section>
+
+            <section class="panel result-panel">
+              <div class="result-heading">
+                <div>
+                  <div class="section-kicker">OUTPUT</div>
+                  <h2>可直接复制的提示词</h2>
+                </div>
+                <button class="icon-button small" id="copyButton" title="复制提示词" aria-label="复制提示词" disabled>⧉</button>
+              </div>
+              <div class="prompt-output" id="promptOutput">
+                <div class="output-placeholder">
+                  <span class="output-mark">✦</span>
+                  <p>完成左侧标注后，点击“生成提示词”。</p>
+                </div>
+              </div>
+              <div class="output-meta" id="outputMeta">等待生成</div>
+            </section>
+
+            <section class="tip-band">
+              <span class="tip-icon">i</span>
+              <p>浏览器版不代替 ChatGPT / Gemini 登录和发送。生成后复制提示词，再在你常用的 AI 工具中上传同一组参考图即可。</p>
+            </section>
+          </aside>
+        </div>
+      </main>
+    </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <script src="./app.js"></script>
+  </body>
+</html>
